@@ -1,0 +1,58 @@
+package francescocristiano.CapstoneProject.event;
+
+import francescocristiano.CapstoneProject.location.Location;
+import francescocristiano.CapstoneProject.team.Team;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.UUID;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+public abstract class Event {
+
+    @Id
+    @GeneratedValue
+    private UUID id;
+
+    private String title;
+
+    private String description;
+
+    private LocalDate startDate;
+
+    private LocalDate endDate;
+
+    private LocalTime startTime;
+
+    private LocalTime endTime;
+
+    private LocalTime meetTime;
+
+    @ManyToOne
+    @JoinColumn(name = "location_id")
+    private Location location;
+
+    @ManyToOne
+    @JoinColumn(name = "team_id")
+    private Team team;
+
+    public Event(String title, String description, LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime, LocalTime meetTime, Location location, Team team) {
+        this.title = title;
+        this.description = description;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.meetTime = meetTime;
+        this.location = location;
+        this.team = team;
+    }
+}
