@@ -3,12 +3,13 @@ package francescocristiano.CapstoneProject.team;
 import francescocristiano.CapstoneProject.coach.Coach;
 import francescocristiano.CapstoneProject.event.Event;
 import francescocristiano.CapstoneProject.location.stadium.Stadium;
-import francescocristiano.CapstoneProject.message.Room;
+import francescocristiano.CapstoneProject.message.room.Room;
 import francescocristiano.CapstoneProject.player.playerClass.Player;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,8 +21,8 @@ public class Team {
     @GeneratedValue
     private UUID id;
     private String name;
-    private int yearOfCreation;
-    private int phone;
+    private LocalDate creationDate;
+    private String phone;
     private String email;
     private String address;
     private String country;
@@ -48,9 +49,9 @@ public class Team {
     private Room commonRoom;
 
 
-    public Team(String name, int yearOfCreation, int phone, String email, String address, String country, String avatar, String primaryColor, String secondaryColor, Coach coach) {
+    public Team(String name, LocalDate creationDate, String phone, String email, String address, String country, String primaryColor, String secondaryColor, Coach coach) {
         this.name = name;
-        this.yearOfCreation = yearOfCreation;
+        this.creationDate = creationDate;
         this.phone = phone;
         this.email = email;
         this.address = address;

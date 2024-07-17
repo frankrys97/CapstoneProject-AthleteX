@@ -1,6 +1,7 @@
 package francescocristiano.CapstoneProject.user.service;
 
 import francescocristiano.CapstoneProject.coach.Coach;
+import francescocristiano.CapstoneProject.exceptions.BadRequestException;
 import francescocristiano.CapstoneProject.exceptions.NotFoundExpetion;
 import francescocristiano.CapstoneProject.player.playerClass.Player;
 import francescocristiano.CapstoneProject.team.service.TeamService;
@@ -42,21 +43,21 @@ public class UserService {
 
     public User createUser(UserRegisterDTO userRegisterDTO) {
         if (userRepository.findByEmail(userRegisterDTO.email()).isPresent()) {
-            throw new NotFoundExpetion("Email already exists");
+            throw new BadRequestException("Email already exists");
         }
         if (userRepository.findByUsername(userRegisterDTO.username()).isPresent()) {
-            throw new NotFoundExpetion("Username already exists");
+            throw new BadRequestException("Username already exists");
         }
 
-        switch (userRegisterDTO.userType()) {
-            case "coach" -> {
+        switch (userRegisterDTO.userType().toUpperCase()) {
+            case "COACH" -> {
                 return userRepository.save(new Coach(userRegisterDTO.name(),
                         userRegisterDTO.surname(),
                         userRegisterDTO.username(),
                         bCryptPasswordEncoder.encode(userRegisterDTO.password()),
                         userRegisterDTO.email()));
             }
-            case "player" -> {
+            case "PLAYER" -> {
                 if (userRegisterDTO.teamId() == null) {
                     throw new NotFoundExpetion("Team not found");
                 }
@@ -68,7 +69,7 @@ public class UserService {
                         teamService.findById(userRegisterDTO.teamId())));
             }
             default -> {
-                throw new NotFoundExpetion("Invalid user type");
+                throw new BadRequestException("Invalid user type, must be COACH or PLAYER");
             }
         }
     }

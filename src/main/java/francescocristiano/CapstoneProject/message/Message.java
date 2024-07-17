@@ -1,5 +1,6 @@
 package francescocristiano.CapstoneProject.message;
 
+import francescocristiano.CapstoneProject.message.room.Room;
 import francescocristiano.CapstoneProject.user.User;
 import jakarta.persistence.*;
 import lombok.Data;

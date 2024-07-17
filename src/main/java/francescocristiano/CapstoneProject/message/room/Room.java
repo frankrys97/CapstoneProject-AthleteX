@@ -1,5 +1,7 @@
-package francescocristiano.CapstoneProject.message;
+package francescocristiano.CapstoneProject.message.room;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import francescocristiano.CapstoneProject.message.Message;
 import francescocristiano.CapstoneProject.team.Team;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -11,6 +13,7 @@ import java.util.UUID;
 @Entity
 @Data
 @NoArgsConstructor
+@JsonIgnoreProperties({"team", "messages"})
 public class Room {
 
     @Id
@@ -24,4 +27,9 @@ public class Room {
 
     @OneToMany(mappedBy = "room")
     private List<Message> messages;
+
+    public Room(String name, Team team) {
+        this.name = name;
+        this.team = team;
+    }
 }
