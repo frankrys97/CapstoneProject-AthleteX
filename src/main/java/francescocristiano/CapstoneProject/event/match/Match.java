@@ -4,6 +4,7 @@ import francescocristiano.CapstoneProject.event.Event;
 import francescocristiano.CapstoneProject.location.Location;
 import francescocristiano.CapstoneProject.player.statistics.PlayerMatchStats;
 import francescocristiano.CapstoneProject.team.Team;
+import francescocristiano.CapstoneProject.team.formation.Formation;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;

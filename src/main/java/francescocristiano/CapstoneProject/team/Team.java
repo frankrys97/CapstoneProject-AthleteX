@@ -2,6 +2,8 @@ package francescocristiano.CapstoneProject.team;
 
 import francescocristiano.CapstoneProject.coach.Coach;
 import francescocristiano.CapstoneProject.event.Event;
+import francescocristiano.CapstoneProject.location.stadium.Stadium;
+import francescocristiano.CapstoneProject.message.Room;
 import francescocristiano.CapstoneProject.player.playerClass.Player;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -36,6 +38,14 @@ public class Team {
 
     @OneToMany(mappedBy = "team")
     private List<Event> events;
+
+    @OneToOne(mappedBy = "stadium")
+    private Stadium stadium;
+
+    @OneToOne
+    @JoinColumn(name = "common_room_id")
+    private Room commonRoom;
+
 
     public Team(String name, int yearOfCreation, int phone, String email, String address, String country, String avatar, String primaryColor, String secondaryColor, Coach coach) {
         this.name = name;

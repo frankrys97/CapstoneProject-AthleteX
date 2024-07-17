@@ -1,6 +1,7 @@
 package francescocristiano.CapstoneProject.event.training;
 
 import francescocristiano.CapstoneProject.event.Event;
+import francescocristiano.CapstoneProject.excercise.Exercise;
 import francescocristiano.CapstoneProject.player.statistics.PlayerTrainingStats;
 import jakarta.persistence.*;
 import lombok.Getter;

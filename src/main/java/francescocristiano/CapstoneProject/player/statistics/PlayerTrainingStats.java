@@ -4,6 +4,8 @@ import francescocristiano.CapstoneProject.coachRating.CoachRating;
 import francescocristiano.CapstoneProject.event.training.Training;
 import francescocristiano.CapstoneProject.player.playerClass.Player;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,6 +15,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class PlayerTrainingStats extends PlayerStatistics {
+    @ManyToOne
+    @JoinColumn(name = "training_id")
     private Training training;
     private int duration;
 
