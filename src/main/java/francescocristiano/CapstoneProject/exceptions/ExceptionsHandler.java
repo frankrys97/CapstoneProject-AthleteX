@@ -17,12 +17,6 @@ public class ExceptionsHandler {
         return new NewErrorsDTO(e.getMessage(), LocalDateTime.now());
     }
 
-  /*  @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public NewErrorsDTO handleBadRequest(MethodArgumentNotValidException e) {
-        return new NewErrorsDTO(e.getMessage(), LocalDateTime.now());
-    }*/
-
     @ExceptionHandler(NotFoundExpetion.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public NewErrorsDTO handleNotFound(NotFoundExpetion e) {

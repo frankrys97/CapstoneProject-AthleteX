@@ -36,12 +36,11 @@ public class TeamController {
     @PostMapping(consumes = "multipart/form-data")
     @PreAuthorize("hasAuthority('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
-    public Team createTeam(@Valid @ModelAttribute NewTeamDTO teamDTO, @AuthenticationPrincipal User currentUser, BindingResult validationResult) {
+    public Team createTeam(@Valid @ModelAttribute NewTeamDTO teamDTO, BindingResult validationResult, @AuthenticationPrincipal User currentUser) {
         // ModelAttribute è un'annotazione che viene usata per impostare il valore di una variabile sul metodo POST come
         // body di una richiesta HTTP multipart
         if (validationResult.hasErrors()) {
-            throw new BadRequestException(validationResult.getAllErrors().stream().map(ObjectError::getDefaultMessage).
-                    collect(Collectors.joining(", ")));
+            throw new BadRequestException(validationResult.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(", ")));
         }
         return teamService.createTeam(teamDTO, (Coach) currentUser);
     }
