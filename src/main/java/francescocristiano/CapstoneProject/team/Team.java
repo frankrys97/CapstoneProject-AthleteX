@@ -39,7 +39,8 @@ public class Team {
     @OneToMany(mappedBy = "team")
     private List<Event> events;
 
-    @OneToOne(mappedBy = "stadium")
+    @OneToOne
+    @JoinColumn(name = "stadium_id")
     private Stadium stadium;
 
     @OneToOne

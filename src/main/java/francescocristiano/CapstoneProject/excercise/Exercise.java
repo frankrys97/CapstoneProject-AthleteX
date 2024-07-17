@@ -1,10 +1,8 @@
 package francescocristiano.CapstoneProject.excercise;
 
+import francescocristiano.CapstoneProject.event.training.Training;
 import francescocristiano.CapstoneProject.event.training.TrainingType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +12,7 @@ import java.util.UUID;
 @Entity
 @Data
 @NoArgsConstructor
+@Table(name = "exercises")
 public class Exercise {
 
     @Id
@@ -22,7 +21,12 @@ public class Exercise {
     private String name;
     private String description;
     private String videoUrl;
-    @ManyToMany
+
+    @ManyToMany(mappedBy = "exercises")
+    private List<Training> training;
+    @ElementCollection(targetClass = TrainingType.class)
+    @CollectionTable(name = "exercise_supported_training_types", joinColumns = @JoinColumn(name = "exercise_id"))
+    @Enumerated(EnumType.STRING)
     private List<TrainingType> supportedTrainingTypes;
 
     public Exercise(String name, String description, String videoUrl, List<TrainingType> supportedTrainingTypes) {

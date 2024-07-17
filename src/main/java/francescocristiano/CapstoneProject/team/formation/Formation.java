@@ -22,8 +22,7 @@ public class Formation {
     @JoinColumn(name = "match_id", referencedColumnName = "id")
     private Match match;
 
-    @OneToMany
-    @JoinColumn(name = "formation")
+    @OneToMany(mappedBy = "formation")
     private List<PlayerFormation> players;
 
     @Enumerated(EnumType.STRING)

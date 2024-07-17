@@ -2,7 +2,6 @@ package francescocristiano.CapstoneProject.team.formation;
 
 
 import francescocristiano.CapstoneProject.player.playerClass.Player;
-import francescocristiano.CapstoneProject.player.playerClass.PlayerPosition;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,6 +22,14 @@ public class PlayerFormation {
     @ManyToOne
     @JoinColumn(name = "formation_id")
     private Formation formation;
-    @Enumerated(EnumType.STRING)
-    private PlayerPosition position;
+
+    private int leftPosition;
+    private int rightPosition;
+
+    public PlayerFormation(Player player, Formation formation, int leftPosition, int rightPosition) {
+        this.player = player;
+        this.formation = formation;
+        this.leftPosition = leftPosition;
+        this.rightPosition = rightPosition;
+    }
 }

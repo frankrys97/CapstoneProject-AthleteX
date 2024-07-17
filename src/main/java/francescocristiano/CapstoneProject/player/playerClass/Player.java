@@ -5,8 +5,8 @@ import francescocristiano.CapstoneProject.player.avalibilities.PlayerInjuryPerio
 import francescocristiano.CapstoneProject.player.statistics.PlayerStatistics;
 import francescocristiano.CapstoneProject.team.Team;
 import francescocristiano.CapstoneProject.user.User;
-import francescocristiano.CapstoneProject.user.UserRole;
-import francescocristiano.CapstoneProject.user.UserType;
+import francescocristiano.CapstoneProject.user.enums.UserRole;
+import francescocristiano.CapstoneProject.user.enums.UserType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -43,13 +43,18 @@ public class Player extends User {
 
 
     public Player(String nome, String cognome, String username, String password, String email, PlayerPosition position, int jerseyNumber, PlayerStatus status, LocalDate birthDate, double weight, double height, Team team) {
-        super(nome, cognome, username, password, email, UserRole.USER, UserType.PLAYER);
+        super(nome, cognome, username, password, email, UserType.PLAYER, UserRole.USER);
         this.position = position;
         this.jerseyNumber = jerseyNumber;
         this.status = status;
         this.birthDate = birthDate;
         this.weight = weight;
         this.height = height;
+        this.team = team;
+    }
+
+    public Player(String name, String surname, String username, String password, String email, Team team) {
+        super(name, surname, username, password, email, UserType.PLAYER, UserRole.USER);
         this.team = team;
     }
 }

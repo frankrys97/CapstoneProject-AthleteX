@@ -18,7 +18,10 @@ public class Training extends Event {
     @Enumerated(EnumType.STRING)
     private TrainingType trainingType;
 
-    @ManyToMany(mappedBy = "trainings")
+    @ManyToMany
+    @JoinTable(name = "training_exercises",
+            joinColumns = @JoinColumn(name = "training_id"),
+            inverseJoinColumns = @JoinColumn(name = "exercise_id"))
     private List<Exercise> exercises;
 
     private int duration;
