@@ -1,5 +1,6 @@
 package francescocristiano.CapstoneProject.coach;
 
+import francescocristiano.CapstoneProject.message.Message;
 import francescocristiano.CapstoneProject.team.Team;
 import francescocristiano.CapstoneProject.user.User;
 import francescocristiano.CapstoneProject.user.UserRole;
@@ -24,7 +25,7 @@ public class Coach extends User {
     @OneToMany(mappedBy = "receiver")
     private List<Message> receivedMessages;
 
-    public Coach(String username, String password, String email, String avatar) {
-        super(username, password, email, avatar, UserRole.ADMIN, UserType.COACH);
+    public Coach(String nome, String cognome, String username, String password, String email) {
+        super(nome, cognome, username, password, email, UserRole.ADMIN, UserType.COACH);
     }
 }

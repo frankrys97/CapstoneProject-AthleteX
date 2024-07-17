@@ -1,5 +1,6 @@
 package francescocristiano.CapstoneProject.player.playerClass;
 
+import francescocristiano.CapstoneProject.message.Message;
 import francescocristiano.CapstoneProject.player.avalibilities.PlayerInjuryPeriod;
 import francescocristiano.CapstoneProject.player.statistics.PlayerStatistics;
 import francescocristiano.CapstoneProject.team.Team;
