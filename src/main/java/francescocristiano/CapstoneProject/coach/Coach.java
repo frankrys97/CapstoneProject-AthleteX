@@ -7,6 +7,7 @@ import francescocristiano.CapstoneProject.user.User;
 import francescocristiano.CapstoneProject.user.enums.UserRole;
 import francescocristiano.CapstoneProject.user.enums.UserType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +21,7 @@ import java.util.List;
 @NoArgsConstructor
 @JsonIgnoreProperties({"password", "role", "authorities", "enabled", "accountNonExpired", "credentialsNonExpired", "accountNonLocked", "teamCoached", "sentMessages", "receivedMessages"})
 public class Coach extends User {
-    @OneToMany(mappedBy = "coach")
+    @OneToMany(mappedBy = "coach", fetch = FetchType.EAGER)
     private List<Team> teamCoached;
     @OneToMany(mappedBy = "sender")
     private List<Message> sentMessages;

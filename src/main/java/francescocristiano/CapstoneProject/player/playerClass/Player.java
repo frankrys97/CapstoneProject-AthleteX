@@ -55,6 +55,7 @@ public class Player extends User {
 
     public Player(String name, String surname, String username, String password, String email, Team team) {
         super(name, surname, username, password, email, UserType.PLAYER, UserRole.USER);
+        this.status = PlayerStatus.AVAILABLE;
         this.team = team;
     }
 }

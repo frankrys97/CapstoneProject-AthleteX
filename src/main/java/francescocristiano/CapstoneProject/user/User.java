@@ -1,5 +1,6 @@
 package francescocristiano.CapstoneProject.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import francescocristiano.CapstoneProject.user.enums.UserRole;
 import francescocristiano.CapstoneProject.user.enums.UserType;
 import jakarta.persistence.*;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@JsonIgnoreProperties({"sentMessages", "receivedMessages", "enabled", "accountNonExpired", "credentialsNonExpired", "accountNonLocked", "authorities", "password", "role"})
 public abstract class User implements UserDetails {
     @Id
     @GeneratedValue

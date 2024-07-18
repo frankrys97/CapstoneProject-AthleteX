@@ -40,4 +40,10 @@ public class ExceptionsHandler {
     public NewErrorsDTO handleAuthorization(AuthorizationDeniedException e) {
         return new NewErrorsDTO(e.getMessage(), LocalDateTime.now());
     }
+
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public NewErrorsDTO handleForbidden(ForbiddenException e) {
+        return new NewErrorsDTO(e.getMessage(), LocalDateTime.now());
+    }
 }

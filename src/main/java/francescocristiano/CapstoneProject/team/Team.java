@@ -1,5 +1,6 @@
 package francescocristiano.CapstoneProject.team;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import francescocristiano.CapstoneProject.coach.Coach;
 import francescocristiano.CapstoneProject.event.Event;
 import francescocristiano.CapstoneProject.location.stadium.Stadium;
@@ -16,6 +17,7 @@ import java.util.UUID;
 @Entity
 @Data
 @NoArgsConstructor
+@JsonIgnoreProperties({"players"})
 public class Team {
     @Id
     @GeneratedValue
