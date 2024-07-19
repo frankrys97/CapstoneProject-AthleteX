@@ -1,9 +1,6 @@
 package francescocristiano.CapstoneProject.team.payload;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -12,6 +9,7 @@ public record NewTeamDTO(
         @NotBlank(message = "Name cannot be blank")
         @Size(min = 3, max = 50, message = "Name must be between 3 and 50 characters")
         String name,
+        @PastOrPresent(message = "Creation date cannot be in the future")
         LocalDate creationDate,
         @Pattern(regexp = "^\\+?[0-9. ()-]{7,25}$", message = "Invalid phone number")
         String phone,

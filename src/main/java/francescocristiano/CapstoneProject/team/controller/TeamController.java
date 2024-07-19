@@ -19,7 +19,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,7 +40,7 @@ public class TeamController {
     }
 
     @PostMapping(consumes = "multipart/form-data")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('COACH')")
     @ResponseStatus(HttpStatus.CREATED)
     public Team createTeam(@Valid @ModelAttribute NewTeamDTO teamDTO, BindingResult validationResult, @AuthenticationPrincipal User currentUser) {
         // ModelAttribute è un'annotazione che viene usata per impostare il valore di una variabile sul metodo POST come
@@ -50,65 +52,70 @@ public class TeamController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'COACH')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTeamById(@PathVariable UUID id) {
-        teamService.deleteTeamById(id);
+    public void deleteTeamById(@PathVariable UUID id, @AuthenticationPrincipal User currentUser) {
+        teamService.deleteTeamById(id, currentUser);
     }
 
-    @PutMapping("{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public Team updateTeam(@PathVariable UUID id, @Valid @ModelAttribute NewTeamDTO teamDTO, BindingResult validationResult) {
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'COACH')")
+    public Team updateTeam(@PathVariable UUID id, @Valid @ModelAttribute NewTeamDTO teamDTO, BindingResult validationResult, @AuthenticationPrincipal User currentUser) {
         if (validationResult.hasErrors()) {
             throw new BadRequestException(validationResult.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(", ")));
         }
-        return teamService.updateTeam(id, teamDTO);
+        return teamService.updateTeam(id, teamDTO, currentUser);
+    }
+
+    @PatchMapping("/{id}/avatar")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'COACH')")
+    public Team uploadAvatar(@PathVariable UUID id, @RequestParam("avatar") MultipartFile file, @AuthenticationPrincipal User currentUser) throws IOException {
+        return teamService.uploadAvatar(id, file, currentUser);
     }
 
     // COMPONENTS OF TEAMS
 
     @GetMapping("/{id}/components")
-    public TeamComponentsDTO getTeamComponents(@PathVariable UUID id) {
-        return teamService.getTeamComponents(id);
+    public TeamComponentsDTO getTeamComponents(@PathVariable UUID id, @AuthenticationPrincipal User currentUser) {
+        return teamService.getTeamComponents(id, currentUser);
     }
 
     @PostMapping("/{id}/components")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'COACH')")
     @ResponseStatus(HttpStatus.CREATED)
     public NewPlayerAddManuallyResponseDTO addPlayerToTeam(@PathVariable UUID id,
                                                            @RequestBody @Validated NewPlayerDTO player,
                                                            BindingResult validationResult,
-                                                           @AuthenticationPrincipal Coach currentCoach) {
+                                                           @AuthenticationPrincipal User currentUser) {
 
         if (validationResult.hasErrors()) {
             throw new BadRequestException(validationResult.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(", ")));
         }
 
 
-        return teamService.addPlayerToTeam(id, player, currentCoach);
+        return teamService.addPlayerToTeam(id, player, currentUser);
 
     }
 
     @DeleteMapping("/{id}/components/{idComponent}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'COACH')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removePlayerFromTeam(@PathVariable UUID id, @PathVariable UUID idComponent) {
-        teamService.removePlayerFromTeam(id, idComponent);
+    public void removePlayerFromTeam(@PathVariable UUID id, @PathVariable UUID idComponent, @AuthenticationPrincipal User currentUser) {
+        teamService.removePlayerFromTeam(id, idComponent, currentUser);
     }
 
     @PutMapping("/{id}/components/{idComponent}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'COACH')")
     public NewPlayerAddManuallyResponseDTO updatePlayerInTeam(@PathVariable UUID id,
                                                               @PathVariable UUID idComponent,
                                                               @RequestBody @Validated NewPlayerDTO player,
                                                               BindingResult validationResult,
-                                                              @AuthenticationPrincipal Coach currentCoach) {
+                                                              @AuthenticationPrincipal User currentUser) {
         if (validationResult.hasErrors()) {
             throw new BadRequestException(validationResult.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(", ")));
         }
-        return teamService.updatePlayer(id, idComponent, player, currentCoach);
+        return teamService.updatePlayer(id, idComponent, player, currentUser);
     }
 
-    // TODO INSERIRE L'UPLOAD SIA DEI TEAM CHE DEI COMPONENTI
 
 }

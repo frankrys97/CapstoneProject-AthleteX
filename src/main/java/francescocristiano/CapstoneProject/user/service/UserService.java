@@ -6,7 +6,9 @@ import francescocristiano.CapstoneProject.exceptions.NotFoundExpetion;
 import francescocristiano.CapstoneProject.player.playerClass.Player;
 import francescocristiano.CapstoneProject.team.service.TeamService;
 import francescocristiano.CapstoneProject.user.User;
+import francescocristiano.CapstoneProject.user.admin.Admin;
 import francescocristiano.CapstoneProject.user.repository.UserRepository;
+import francescocristiano.CapstoneProject.user.userPayloads.CreateAdminDTO;
 import francescocristiano.CapstoneProject.user.userPayloads.UserRegisterDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,6 +41,19 @@ public class UserService {
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username).orElseThrow(() -> new NotFoundExpetion("User not found"));
+    }
+
+    public Admin createAdmin(CreateAdminDTO adminDTO) {
+        if (userRepository.findByEmail(adminDTO.email()).isPresent()) {
+            throw new BadRequestException("Email already exists");
+        }
+        if (userRepository.findByUsername(adminDTO.username()).isPresent()) {
+            throw new BadRequestException("Username already exists");
+        }
+
+        String encodedPassword = bCryptPasswordEncoder.encode(adminDTO.password());
+        Admin newAdmin = new Admin(adminDTO.name(), adminDTO.surname(), adminDTO.username(), adminDTO.email(), encodedPassword);
+        return userRepository.save(newAdmin);
     }
 
     public User createUser(UserRegisterDTO userRegisterDTO) {

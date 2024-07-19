@@ -29,6 +29,6 @@ public class Coach extends User {
     private List<Message> receivedMessages;
 
     public Coach(String nome, String cognome, String username, String password, String email) {
-        super(nome, cognome, username, password, email, UserType.COACH, UserRole.ADMIN);
+        super(nome, cognome, username, password, email, UserType.COACH, UserRole.USER);
     }
 }

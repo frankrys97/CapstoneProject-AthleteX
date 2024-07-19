@@ -26,8 +26,8 @@ public abstract class User implements UserDetails {
     private String name;
     private String surname;
     private String username;
-    private String password;
     private String email;
+    private String password;
     private String avatar;
     @Enumerated(EnumType.STRING)
     private UserRole role;
@@ -48,7 +48,7 @@ public abstract class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(this.role.name()));
+        return List.of(new SimpleGrantedAuthority(this.role.name()), new SimpleGrantedAuthority(this.userType.name()));
     }
 
     @Override

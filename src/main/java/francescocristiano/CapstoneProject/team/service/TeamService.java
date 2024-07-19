@@ -3,6 +3,7 @@ package francescocristiano.CapstoneProject.team.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import francescocristiano.CapstoneProject.coach.Coach;
+import francescocristiano.CapstoneProject.coach.service.CoachService;
 import francescocristiano.CapstoneProject.exceptions.BadRequestException;
 import francescocristiano.CapstoneProject.exceptions.ForbiddenException;
 import francescocristiano.CapstoneProject.exceptions.NotFoundExpetion;
@@ -18,6 +19,7 @@ import francescocristiano.CapstoneProject.team.Team;
 import francescocristiano.CapstoneProject.team.payload.NewTeamDTO;
 import francescocristiano.CapstoneProject.team.payload.TeamComponentsDTO;
 import francescocristiano.CapstoneProject.team.repository.TeamRepository;
+import francescocristiano.CapstoneProject.user.User;
 import francescocristiano.CapstoneProject.user.enums.UserRole;
 import francescocristiano.CapstoneProject.user.enums.UserType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,9 @@ public class TeamService {
     @Autowired
     private PlayerService playerService;
 
+    @Autowired
+    private CoachService coachService;
+
     public Team findById(UUID id) {
         return teamRepository.findById(id).orElseThrow(() -> new NotFoundExpetion("Team not found"));
     }
@@ -72,6 +77,24 @@ public class TeamService {
         return teamRepository.findAllByCoachId(coachId);
     }
 
+    public Team createTeamByAdmin(NewTeamDTO teamDTO, UUID coachId) {
+        Coach coach = coachService.findById(coachId);
+        Team newTeam = teamRepository.save(new Team(teamDTO.name(),
+                teamDTO.creationDate(),
+                teamDTO.phone(),
+                teamDTO.email(),
+                teamDTO.address(),
+                teamDTO.country(),
+                teamDTO.primaryColor(),
+                teamDTO.secondaryColor(),
+                coach));
+        Room commonRoom = new Room(teamDTO.name().concat(" - Common Room"), newTeam);
+        roomService.saveRoom(commonRoom);
+        newTeam.setCommonRoom(commonRoom);
+        teamRepository.save(newTeam);
+        return newTeam;
+    }
+
     public Team createTeam(NewTeamDTO teamDTO, Coach coach) {
         List<Team> teams = findAllByCoachId(coach.getId());
         if (teams.stream().anyMatch(t -> t.getName().equals(teamDTO.name())) || teams.stream().anyMatch(t -> t.getEmail().equals(teamDTO.email()))) {
@@ -92,7 +115,7 @@ public class TeamService {
         teamRepository.save(newTeam);
         if (teamDTO.avatar() != null && !teamDTO.avatar().isEmpty()) {
             try {
-                uploadAvatar(newTeam.getId(), teamDTO.avatar());
+                uploadAvatar(newTeam.getId(), teamDTO.avatar(), coach);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -100,15 +123,22 @@ public class TeamService {
         return newTeam;
     }
 
-    public Team uploadAvatar(UUID id, MultipartFile file) throws IOException {
-        String cloudinaryUrl = cloudinaryService.uploader().upload(file.getBytes(), ObjectUtils.emptyMap()).get("url").toString();
+    public Team uploadAvatar(UUID id, MultipartFile file, User currentUser) throws IOException {
         Team foundTeam = findById(id);
+        if (currentUser.getUserType().equals(UserType.COACH) && !foundTeam.getCoach().getId().equals(currentUser.getId())) {
+            throw new ForbiddenException("You are not allowed to update this team");
+        }
+        String cloudinaryUrl = cloudinaryService.uploader().upload(file.getBytes(), ObjectUtils.emptyMap()).get("url").toString();
         foundTeam.setAvatar(cloudinaryUrl);
         return teamRepository.save(foundTeam);
     }
 
-    public void deleteTeamById(UUID id) {
+    public void deleteTeamById(UUID id, User currentUser) {
         Team foundTeam = findById(id);
+        if (currentUser.getUserType().equals(UserType.COACH) && !foundTeam.getCoach().getId().equals(currentUser.getId())) {
+            throw new ForbiddenException("You are not allowed to delete this team");
+        }
+
         if (foundTeam.getCommonRoom() != null) {
             UUID roomId = foundTeam.getCommonRoom().getId();
             foundTeam.setCommonRoom(null);
@@ -118,8 +148,11 @@ public class TeamService {
         teamRepository.delete(foundTeam);
     }
 
-    public Team updateTeam(UUID id, NewTeamDTO teamDTO) {
+    public Team updateTeam(UUID id, NewTeamDTO teamDTO, User currentUser) {
         Team foundTeam = findById(id);
+        if (currentUser.getUserType().equals(UserType.COACH) && !foundTeam.getCoach().getId().equals(currentUser.getId())) {
+            throw new ForbiddenException("You are not allowed to update this team");
+        }
         foundTeam.setName(teamDTO.name());
         foundTeam.setCreationDate(teamDTO.creationDate());
         foundTeam.setPhone(teamDTO.phone());
@@ -131,7 +164,7 @@ public class TeamService {
         teamRepository.save(foundTeam);
         if (teamDTO.avatar() != null && !teamDTO.avatar().isEmpty()) {
             try {
-                uploadAvatar(id, teamDTO.avatar());
+                uploadAvatar(id, teamDTO.avatar(), currentUser);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -139,19 +172,23 @@ public class TeamService {
         return foundTeam;
     }
 
-    public TeamComponentsDTO getTeamComponents(UUID id) {
+    public TeamComponentsDTO getTeamComponents(UUID id, User currentUser) {
         Team foundTeam = findById(id);
+        if (currentUser.getUserType().equals(UserType.COACH) && !currentUser.getId().equals(findById(id).getCoach().getId()) || foundTeam.getPlayers().stream().noneMatch(p -> p.getId().equals(currentUser.getId()))) {
+            throw new ForbiddenException("You are not allowed to access this team");
+        }
         Coach coach = foundTeam.getCoach();
         List<Player> players = foundTeam.getPlayers();
         return new TeamComponentsDTO(coach, players);
     }
 
-    public NewPlayerAddManuallyResponseDTO addPlayerToTeam(UUID id, NewPlayerDTO player, Coach currentCoach) {
-        if (currentCoach.getTeamCoached().stream().noneMatch(idTeam -> idTeam.getId().equals(id))) {
-            throw new ForbiddenException("You are not authorized to add players to this team");
-        }
+    public NewPlayerAddManuallyResponseDTO addPlayerToTeam(UUID id, NewPlayerDTO player, User currentUser) {
+
 
         Team foundTeam = findById(id);
+        if (currentUser.getUserType().equals(UserType.COACH) && !currentUser.getId().equals(foundTeam.getCoach().getId())) {
+            throw new ForbiddenException("You are not allowed to add players to this team");
+        }
         Player newPlayer = new Player();
         newPlayer.setName(player.name());
         newPlayer.setSurname(player.surname());
@@ -192,20 +229,23 @@ public class TeamService {
         );
     }
 
-    public void removePlayerFromTeam(UUID id, UUID playerId) {
+    public void removePlayerFromTeam(UUID id, UUID playerId, User currentUser) {
         Team foundTeam = findById(id);
+        if (currentUser.getUserType().equals(UserType.COACH) && !currentUser.getId().equals(foundTeam.getCoach().getId())) {
+            throw new ForbiddenException("You are not allowed to remove players from this team");
+        }
         Player foundPlayer = playerService.findById(playerId);
         foundTeam.getPlayers().remove(foundPlayer);
         teamRepository.save(foundTeam);
         playerService.deleteById(playerId);
     }
 
-    public NewPlayerAddManuallyResponseDTO updatePlayer(UUID id, UUID playerId, NewPlayerDTO player, Coach currentCoach) {
-        if (currentCoach.getTeamCoached().stream().noneMatch(idTeam -> idTeam.getId().equals(id))) {
-            throw new ForbiddenException("You are not authorized to add players to this team");
+    public NewPlayerAddManuallyResponseDTO updatePlayer(UUID id, UUID playerId, NewPlayerDTO player, User currentUser) {
+        Team foundTeam = findById(id);
+        if (currentUser.getUserType().equals(UserType.COACH) && !currentUser.getId().equals(foundTeam.getCoach().getId())) {
+            throw new ForbiddenException("You are not allowed to update this player");
         }
         Player foundPlayer = playerService.findById(playerId);
-        Team foundTeam = findById(id);
         foundPlayer.setName(player.name());
         foundPlayer.setSurname(player.surname());
         foundPlayer.setBirthDate(player.birthDate());
@@ -234,4 +274,5 @@ public class TeamService {
                 foundPlayer.getTeam().getName(),
                 foundPlayer.getTeam().getCoach().getName() + " " + foundPlayer.getTeam().getCoach().getSurname());
     }
+
 }

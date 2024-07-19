@@ -3,7 +3,7 @@ package francescocristiano.CapstoneProject.user.enums;
 import francescocristiano.CapstoneProject.exceptions.BadRequestException;
 
 public enum UserType {
-    COACH, PLAYER;
+    COACH, PLAYER, ADMIN;
 
     public static UserType getUserType(String type) {
         return switch (type) {

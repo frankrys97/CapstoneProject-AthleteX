@@ -3,6 +3,7 @@ package francescocristiano.CapstoneProject.security.auth;
 import francescocristiano.CapstoneProject.exceptions.BadRequestException;
 import francescocristiano.CapstoneProject.user.User;
 import francescocristiano.CapstoneProject.user.service.UserService;
+import francescocristiano.CapstoneProject.user.userPayloads.CreateAdminDTO;
 import francescocristiano.CapstoneProject.user.userPayloads.UserLoginDTO;
 import francescocristiano.CapstoneProject.user.userPayloads.UserRegisterDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,5 +40,14 @@ public class AuthController {
             throw new BadRequestException(validationResult.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(", ")));
         }
         return userService.createUser(newUserDTO);
+    }
+
+    @PostMapping("/register/admin")
+    @ResponseStatus(HttpStatus.CREATED)
+    public User registerAdmin(@RequestBody @Validated CreateAdminDTO newAdminDTO, BindingResult validationResult) {
+        if (validationResult.hasErrors()) {
+            throw new BadRequestException(validationResult.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(", ")));
+        }
+        return userService.createAdmin(newAdminDTO);
     }
 }

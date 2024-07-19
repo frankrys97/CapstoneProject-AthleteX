@@ -17,7 +17,7 @@ import java.util.UUID;
 @Entity
 @Data
 @NoArgsConstructor
-@JsonIgnoreProperties({"players"})
+@JsonIgnoreProperties({"players", "events", "stadium", "commonRoom"})
 public class Team {
     @Id
     @GeneratedValue
