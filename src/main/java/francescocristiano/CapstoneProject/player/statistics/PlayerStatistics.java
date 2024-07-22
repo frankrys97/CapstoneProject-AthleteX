@@ -1,6 +1,6 @@
 package francescocristiano.CapstoneProject.player.statistics;
 
-import francescocristiano.CapstoneProject.coachRating.CoachRating;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import francescocristiano.CapstoneProject.player.playerClass.Player;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -12,6 +12,7 @@ import java.util.UUID;
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Data
 @NoArgsConstructor
+@JsonIgnoreProperties({"player"})
 public abstract class PlayerStatistics {
     @Id
     @GeneratedValue
@@ -20,12 +21,13 @@ public abstract class PlayerStatistics {
     @JoinColumn(name = "player_id")
     private Player player;
     private boolean attendance;
-    @OneToOne(mappedBy = "playerStatistics")
-    private CoachRating coachRating;
+    private int coachRating;
+    private String coachComment;
 
-    public PlayerStatistics(Player player, boolean attendance, CoachRating coachRating) {
+    public PlayerStatistics(Player player, boolean attendance, int coachRating, String coachComment) {
         this.player = player;
         this.attendance = attendance;
         this.coachRating = coachRating;
+        this.coachComment = coachComment;
     }
 }

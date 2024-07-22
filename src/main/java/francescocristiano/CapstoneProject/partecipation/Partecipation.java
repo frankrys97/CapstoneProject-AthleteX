@@ -1,7 +1,7 @@
 package francescocristiano.CapstoneProject.partecipation;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import francescocristiano.CapstoneProject.team.Team;
-import francescocristiano.CapstoneProject.user.User;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,15 +11,14 @@ import java.util.UUID;
 @Entity
 @Data
 @NoArgsConstructor
+@JsonIgnoreProperties({"team"})
 public class Partecipation {
 
     @Id
     @GeneratedValue
     private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    private String email;
 
     @ManyToOne
     @JoinColumn(name = "team_id")
@@ -28,8 +27,8 @@ public class Partecipation {
     @Enumerated(EnumType.STRING)
     private StatusOfPartecipation statusOfPartecipation;
 
-    public Partecipation(User user, Team team) {
-        this.user = user;
+    public Partecipation(String email, Team team) {
+        this.email = email;
         this.team = team;
         this.statusOfPartecipation = StatusOfPartecipation.PENDING;
     }

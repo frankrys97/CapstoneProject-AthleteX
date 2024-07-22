@@ -1,6 +1,7 @@
 package francescocristiano.CapstoneProject.player.statistics;
 
-import francescocristiano.CapstoneProject.coachRating.CoachRating;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import francescocristiano.CapstoneProject.event.training.Training;
 import francescocristiano.CapstoneProject.player.playerClass.Player;
 import jakarta.persistence.Entity;
@@ -14,14 +15,15 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@JsonIgnoreProperties({"player", "training"})
 public class PlayerTrainingStats extends PlayerStatistics {
     @ManyToOne
     @JoinColumn(name = "training_id")
     private Training training;
     private int duration;
 
-    public PlayerTrainingStats(Player player, boolean attendance, CoachRating coachRating, Training training, int duration) {
-        super(player, attendance, coachRating);
+    public PlayerTrainingStats(Player player, boolean attendance, int coachRating, String coachComment, Training training, int duration) {
+        super(player, attendance, coachRating, coachComment);
         this.training = training;
         this.duration = duration;
     }

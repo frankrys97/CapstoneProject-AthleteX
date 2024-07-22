@@ -7,12 +7,14 @@ import francescocristiano.CapstoneProject.exceptions.NotFoundExpetion;
 import francescocristiano.CapstoneProject.player.payload.NewUpdateByPlayerDTO;
 import francescocristiano.CapstoneProject.player.playerClass.Player;
 import francescocristiano.CapstoneProject.player.repository.PlayerRepository;
+import francescocristiano.CapstoneProject.team.Team;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -72,5 +74,13 @@ public class PlayerService {
         String cloudinaryUrl = cloudinaryService.uploader().upload(file.getBytes(), ObjectUtils.emptyMap()).get("url").toString();
         player.setAvatar(cloudinaryUrl);
         return playerRepository.save(player);
+    }
+
+    public void clearTeamFromPlayer(Team team) {
+        List<Player> players = team.getPlayers();
+        for (Player player : players) {
+            player.setTeam(null);
+            playerRepository.save(player);
+        }
     }
 }

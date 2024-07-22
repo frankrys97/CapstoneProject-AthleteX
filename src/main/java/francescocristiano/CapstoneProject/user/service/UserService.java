@@ -3,6 +3,7 @@ package francescocristiano.CapstoneProject.user.service;
 import francescocristiano.CapstoneProject.coach.Coach;
 import francescocristiano.CapstoneProject.exceptions.BadRequestException;
 import francescocristiano.CapstoneProject.exceptions.NotFoundExpetion;
+import francescocristiano.CapstoneProject.partecipation.service.PartecipationService;
 import francescocristiano.CapstoneProject.player.playerClass.Player;
 import francescocristiano.CapstoneProject.team.service.TeamService;
 import francescocristiano.CapstoneProject.user.User;
@@ -11,6 +12,7 @@ import francescocristiano.CapstoneProject.user.repository.UserRepository;
 import francescocristiano.CapstoneProject.user.userPayloads.CreateAdminDTO;
 import francescocristiano.CapstoneProject.user.userPayloads.UserRegisterDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,10 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder bCryptPasswordEncoder;
+
+    @Autowired
+    @Lazy
+    private PartecipationService partecipationService;
 
 
     public User findById(UUID id) {
@@ -56,7 +62,7 @@ public class UserService {
         return userRepository.save(newAdmin);
     }
 
-    public User createUser(UserRegisterDTO userRegisterDTO) {
+    public User createUser(UserRegisterDTO userRegisterDTO, UUID teamId) {
         if (userRepository.findByEmail(userRegisterDTO.email()).isPresent()) {
             throw new BadRequestException("Email already exists");
         }
@@ -66,6 +72,7 @@ public class UserService {
 
         switch (userRegisterDTO.userType().toUpperCase()) {
             case "COACH" -> {
+
                 return userRepository.save(new Coach(userRegisterDTO.name(),
                         userRegisterDTO.surname(),
                         userRegisterDTO.username(),
@@ -73,15 +80,18 @@ public class UserService {
                         userRegisterDTO.email()));
             }
             case "PLAYER" -> {
-                if (userRegisterDTO.teamId() == null) {
-                    throw new NotFoundExpetion("Team not found");
+                if (teamId == null) {
+                    throw new BadRequestException("Team id is required");
                 }
-                return userRepository.save(new Player(userRegisterDTO.name(),
+                Player newPlayer = userRepository.save(new Player(userRegisterDTO.name(),
                         userRegisterDTO.surname(),
                         userRegisterDTO.username(),
                         bCryptPasswordEncoder.encode(userRegisterDTO.password()),
                         userRegisterDTO.email(),
                         teamService.findById(userRegisterDTO.teamId())));
+
+                partecipationService.acceptPartecipationByEmail(newPlayer.getEmail());
+                return newPlayer;
             }
             default -> {
                 throw new BadRequestException("Invalid user type, must be COACH or PLAYER");

@@ -6,10 +6,10 @@ import francescocristiano.CapstoneProject.coach.payloads.NewUpdateCoachDTO;
 import francescocristiano.CapstoneProject.coach.service.CoachService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/coaches")
@@ -21,5 +21,15 @@ public class CoachController {
     @PutMapping("/me")
     public Coach updateCoach(@RequestBody NewUpdateCoachDTO body, @AuthenticationPrincipal Coach coach) {
         return coachService.updateCoach(body, coach);
+    }
+
+    @PatchMapping("/me/avatar")
+    public Coach uploadAvatar(@RequestParam("avatar") MultipartFile file, @AuthenticationPrincipal Coach coach) throws IOException {
+        return coachService.uploadAvatar(file, coach);
+    }
+
+    @DeleteMapping("/me")
+    public void deleteCoach(@AuthenticationPrincipal Coach coach) {
+        coachService.deleteCoach(coach);
     }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import francescocristiano.CapstoneProject.exceptions.NewErrorsDTO;
+import francescocristiano.CapstoneProject.exceptions.NotFoundExpetion;
 import francescocristiano.CapstoneProject.exceptions.UnauthorizedException;
 import francescocristiano.CapstoneProject.user.User;
 import francescocristiano.CapstoneProject.user.service.UserService;
@@ -58,6 +59,12 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             NewErrorsDTO errorDTO = new NewErrorsDTO(e.getMessage(), LocalDateTime.now());
             String jsonResponse = objectMapper.writeValueAsString(errorDTO);
             response.getWriter().write(jsonResponse);
+        } catch (NotFoundExpetion e) {
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+            response.setContentType("application/json");
+            NewErrorsDTO errorDTO = new NewErrorsDTO(e.getMessage(), LocalDateTime.now());
+            String jsonResponse = objectMapper.writeValueAsString(errorDTO);
+            response.getWriter().write(jsonResponse);
         } catch (Exception e) {
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             response.setContentType("application/json");
@@ -69,6 +76,8 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return new AntPathMatcher().match("/auth/**", request.getServletPath());
+        return new AntPathMatcher().match("/auth/**", request.getServletPath()) ||
+                new AntPathMatcher().match("/partecipations/**/reject", request.getServletPath()) ||
+                new AntPathMatcher().match("/partecipations/**/reject", request.getServletPath());
     }
 }

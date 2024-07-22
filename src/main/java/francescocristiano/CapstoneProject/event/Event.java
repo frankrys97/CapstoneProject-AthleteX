@@ -1,6 +1,7 @@
 package francescocristiano.CapstoneProject.event;
 
-import francescocristiano.CapstoneProject.location.Location;
+import francescocristiano.CapstoneProject.event.enums.EventType;
+import francescocristiano.CapstoneProject.event.enums.LocationType;
 import francescocristiano.CapstoneProject.team.Team;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -22,6 +23,9 @@ public abstract class Event {
     @GeneratedValue
     private UUID id;
 
+    @Enumerated(EnumType.STRING)
+    private EventType eventType;
+
     private String title;
 
     private String description;
@@ -36,15 +40,15 @@ public abstract class Event {
 
     private LocalTime meetTime;
 
-    @ManyToOne
-    @JoinColumn(name = "location_id")
-    private Location location;
+    @Enumerated(EnumType.STRING)
+    private LocationType locationType;
 
     @ManyToOne
     @JoinColumn(name = "team_id")
     private Team team;
 
-    public Event(String title, String description, LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime, LocalTime meetTime, Location location, Team team) {
+    public Event(EventType eventType, String title, String description, LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime, LocalTime meetTime, LocationType locationType, Team team) {
+        this.eventType = eventType;
         this.title = title;
         this.description = description;
         this.startDate = startDate;
@@ -52,7 +56,7 @@ public abstract class Event {
         this.startTime = startTime;
         this.endTime = endTime;
         this.meetTime = meetTime;
-        this.location = location;
+        this.locationType = locationType;
         this.team = team;
     }
 }

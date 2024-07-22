@@ -4,6 +4,14 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import francescocristiano.CapstoneProject.coach.Coach;
 import francescocristiano.CapstoneProject.coach.service.CoachService;
+import francescocristiano.CapstoneProject.event.Event;
+import francescocristiano.CapstoneProject.event.enums.EventType;
+import francescocristiano.CapstoneProject.event.match.Match;
+import francescocristiano.CapstoneProject.event.match.MatchService;
+import francescocristiano.CapstoneProject.event.payloads.NewEventDTO;
+import francescocristiano.CapstoneProject.event.service.EventService;
+import francescocristiano.CapstoneProject.event.training.Training;
+import francescocristiano.CapstoneProject.event.training.TrainingService;
 import francescocristiano.CapstoneProject.exceptions.BadRequestException;
 import francescocristiano.CapstoneProject.exceptions.ForbiddenException;
 import francescocristiano.CapstoneProject.exceptions.NotFoundExpetion;
@@ -15,6 +23,8 @@ import francescocristiano.CapstoneProject.player.playerClass.Player;
 import francescocristiano.CapstoneProject.player.playerClass.PlayerPosition;
 import francescocristiano.CapstoneProject.player.playerClass.PlayerStatus;
 import francescocristiano.CapstoneProject.player.service.PlayerService;
+import francescocristiano.CapstoneProject.stadium.Stadium;
+import francescocristiano.CapstoneProject.stadium.StadiumService;
 import francescocristiano.CapstoneProject.team.Team;
 import francescocristiano.CapstoneProject.team.payload.NewTeamDTO;
 import francescocristiano.CapstoneProject.team.payload.TeamComponentsDTO;
@@ -54,16 +64,32 @@ public class TeamService {
     @Autowired
     private CoachService coachService;
 
+    @Autowired
+    private MatchService matchService;
+
+    @Autowired
+    private TrainingService trainingService;
+
+    @Autowired
+    private EventService eventService;
+
+    @Autowired
+    private StadiumService stadiumService;
+
+
     public Team findById(UUID id) {
         return teamRepository.findById(id).orElseThrow(() -> new NotFoundExpetion("Team not found"));
     }
 
 
     public Page<Team> getAllTeamsByCoachId(UUID coachId, int page, int size, String sortBy) {
+
+        coachService.findById(coachId);
         if (size > 50) size = 50;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
         return teamRepository.findByCoachId(coachId, pageable);
     }
+
 
     public Team findByName(String name) {
         return teamRepository.findByName(name).orElseThrow(() -> new NotFoundExpetion("Team not found"));
@@ -133,18 +159,42 @@ public class TeamService {
         return teamRepository.save(foundTeam);
     }
 
+
+    @Transactional
     public void deleteTeamById(UUID id, User currentUser) {
         Team foundTeam = findById(id);
         if (currentUser.getUserType().equals(UserType.COACH) && !foundTeam.getCoach().getId().equals(currentUser.getId())) {
             throw new ForbiddenException("You are not allowed to delete this team");
         }
 
+        if (foundTeam.getEvents() != null) {
+            List<UUID> eventIds = foundTeam.getEvents().stream().map(Event::getId).toList();
+            foundTeam.getEvents().clear();
+            for (UUID eventId : eventIds) {
+                eventService.deleteById(eventId);
+            }
+        }
+
+        if (foundTeam.getPlayers() != null) {
+            playerService.clearTeamFromPlayer(foundTeam);
+            foundTeam.getPlayers().clear();
+        }
+
         if (foundTeam.getCommonRoom() != null) {
             UUID roomId = foundTeam.getCommonRoom().getId();
             foundTeam.setCommonRoom(null);
-            teamRepository.save(foundTeam);
             roomService.deleteRoomById(roomId);
         }
+
+        if (foundTeam.getStadium() != null) {
+            Stadium stadium = foundTeam.getStadium();
+            foundTeam.setStadium(null);
+            stadium.setTeam(null);
+            stadiumService.save(stadium);
+        }
+
+
+        teamRepository.save(foundTeam);
         teamRepository.delete(foundTeam);
     }
 
@@ -174,7 +224,7 @@ public class TeamService {
 
     public TeamComponentsDTO getTeamComponents(UUID id, User currentUser) {
         Team foundTeam = findById(id);
-        if (currentUser.getUserType().equals(UserType.COACH) && !currentUser.getId().equals(findById(id).getCoach().getId()) || foundTeam.getPlayers().stream().noneMatch(p -> p.getId().equals(currentUser.getId()))) {
+        if (currentUser.getUserType().equals(UserType.COACH) && !currentUser.getId().equals(foundTeam.getCoach().getId()) || currentUser.getUserType().equals(UserType.PLAYER) && foundTeam.getPlayers().stream().noneMatch(p -> p.getId().equals(currentUser.getId()))) {
             throw new ForbiddenException("You are not allowed to access this team");
         }
         Coach coach = foundTeam.getCoach();
@@ -206,7 +256,7 @@ public class TeamService {
         }
         if (player.jerseyNumber() != null) {
             if (playerService.findByJerseyNumber(player.jerseyNumber(), id).isPresent()) {
-                throw new BadRequestException("Player with jersey number " + player.jerseyNumber() + " already exists");
+                throw new BadRequestException("Jersey number " + player.jerseyNumber() + " already in use");
             }
             newPlayer.setJerseyNumber(player.jerseyNumber());
         }
@@ -235,9 +285,10 @@ public class TeamService {
             throw new ForbiddenException("You are not allowed to remove players from this team");
         }
         Player foundPlayer = playerService.findById(playerId);
+        foundPlayer.setTeam(null);
         foundTeam.getPlayers().remove(foundPlayer);
         teamRepository.save(foundTeam);
-        playerService.deleteById(playerId);
+        playerService.savePlayer(foundPlayer);
     }
 
     public NewPlayerAddManuallyResponseDTO updatePlayer(UUID id, UUID playerId, NewPlayerDTO player, User currentUser) {
@@ -273,6 +324,60 @@ public class TeamService {
                 foundPlayer.getStatus(),
                 foundPlayer.getTeam().getName(),
                 foundPlayer.getTeam().getCoach().getName() + " " + foundPlayer.getTeam().getCoach().getSurname());
+    }
+
+    // EVENTS
+
+    public Page<Event> findEventsByTeamId(UUID id, int page, int size, String sortBy, User currentUser) {
+        Team foundTeam = findById(id);
+        if (currentUser.getUserType().equals(UserType.COACH) && !foundTeam.getCoach().getId().equals(currentUser.getId()) ||
+                currentUser.getUserType().equals(UserType.PLAYER) && foundTeam.getPlayers().stream().noneMatch(player -> player.getId().equals(currentUser.getId()))) {
+            throw new ForbiddenException("You are not allowed to see this team's events");
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        return eventService.findAllByTeamId(id, pageable);
+    }
+
+    public Event addEventToTeam(UUID id, NewEventDTO event, User currentUser) {
+        Team foundTeam = findById(id);
+        if (currentUser.getUserType().equals(UserType.COACH) && !foundTeam.getCoach().getId().equals(currentUser.getId())) {
+            throw new ForbiddenException("You are not allowed to add events to this team");
+        }
+
+        return switch (EventType.getEventType(event.eventType())) {
+            case EventType.MATCH -> matchService.addMatchToTeam(foundTeam, event);
+            case EventType.TRAINING -> trainingService.addTrainingToTeam(foundTeam, event);
+            default -> throw new BadRequestException("Invalid event type, must be either 'MATCH' or 'TRAINING'");
+        };
+    }
+
+    public void removeEventFromTeam(UUID id, UUID eventId, User currentUser) {
+        Team foundTeam = findById(id);
+        if (currentUser.getUserType().equals(UserType.COACH) && !foundTeam.getCoach().getId().equals(currentUser.getId())) {
+            throw new ForbiddenException("You are not allowed to remove events from this team");
+        }
+        Event foundEvent = eventService.findById(eventId);
+        foundTeam.getEvents().remove(foundEvent);
+        teamRepository.save(foundTeam);
+        eventService.deleteById(eventId);
+    }
+
+
+    public Event updateEvent(UUID id, UUID eventId, NewEventDTO event, User currentUser) {
+        Team foundTeam = findById(id);
+        if (currentUser.getUserType().equals(UserType.COACH) && !foundTeam.getCoach().getId().equals(currentUser.getId())) {
+            throw new ForbiddenException("You are not allowed to update this event");
+        }
+        Event foundEvent = eventService.findById(eventId);
+
+        switch (EventType.getEventType(event.eventType())) {
+            case MATCH -> matchService.updateMatchInTeam((Match) foundEvent, event);
+            case TRAINING -> trainingService.updateTrainingInTeam((Training) foundEvent, event);
+            default -> throw new BadRequestException("Invalid event type, must be either 'MATCH' or 'TRAINING'");
+        }
+        ;
+        return foundEvent;
     }
 
 }

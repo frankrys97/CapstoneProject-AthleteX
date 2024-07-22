@@ -1,6 +1,8 @@
 package francescocristiano.CapstoneProject.team.controller;
 
 import francescocristiano.CapstoneProject.coach.Coach;
+import francescocristiano.CapstoneProject.event.Event;
+import francescocristiano.CapstoneProject.event.payloads.NewEventDTO;
 import francescocristiano.CapstoneProject.exceptions.BadRequestException;
 import francescocristiano.CapstoneProject.player.payload.NewPlayerAddManuallyResponseDTO;
 import francescocristiano.CapstoneProject.player.payload.NewPlayerDTO;
@@ -115,6 +117,36 @@ public class TeamController {
             throw new BadRequestException(validationResult.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(", ")));
         }
         return teamService.updatePlayer(id, idComponent, player, currentUser);
+    }
+
+    // Events for team
+    @GetMapping("/{id}/events")
+    public Page<Event> getEventsForTeam(@PathVariable UUID id,
+                                        @RequestParam(defaultValue = "0") int page,
+                                        @RequestParam(defaultValue = "10") int size,
+                                        @RequestParam(defaultValue = "id") String sortBy,
+                                        @AuthenticationPrincipal User currentUser) {
+        return teamService.findEventsByTeamId(id, page, size, sortBy, currentUser);
+    }
+
+    @PostMapping("/{id}/events")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'COACH')")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Event addEventToTeam(@PathVariable UUID id, @RequestBody NewEventDTO event, @AuthenticationPrincipal User currentUser) {
+        return teamService.addEventToTeam(id, event, currentUser);
+    }
+
+    @DeleteMapping("/{id}/events/{idEvent}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'COACH')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeEventFromTeam(@PathVariable UUID id, @PathVariable UUID idEvent, @AuthenticationPrincipal User currentUser) {
+        teamService.removeEventFromTeam(id, idEvent, currentUser);
+    }
+
+    @PutMapping("/{id}/events/{idEvent}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'COACH')")
+    public Event updateEventInTeam(@PathVariable UUID id, @PathVariable UUID idEvent, @RequestBody NewEventDTO event, @AuthenticationPrincipal User currentUser) {
+        return teamService.updateEvent(id, idEvent, event, currentUser);
     }
 
 

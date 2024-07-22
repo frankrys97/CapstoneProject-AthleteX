@@ -1,7 +1,8 @@
 package francescocristiano.CapstoneProject.event.match;
 
 import francescocristiano.CapstoneProject.event.Event;
-import francescocristiano.CapstoneProject.location.Location;
+import francescocristiano.CapstoneProject.event.enums.EventType;
+import francescocristiano.CapstoneProject.event.enums.LocationType;
 import francescocristiano.CapstoneProject.player.statistics.PlayerMatchStats;
 import francescocristiano.CapstoneProject.team.Team;
 import francescocristiano.CapstoneProject.team.formation.Formation;
@@ -28,10 +29,9 @@ public class Match extends Event {
     @OneToMany(mappedBy = "match")
     private List<PlayerMatchStats> playerMatchStats;
 
-    public Match(String title, String description, LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime, LocalTime meetTime, Location location, Team team, String opponent, boolean home, Formation formation) {
-        super(title, description, startDate, endDate, startTime, endTime, meetTime, location, team);
+    public Match(String title, String description, LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime, LocalTime meetTime, Team team, String opponent, boolean home) {
+        super(EventType.MATCH, title, description, startDate, endDate, startTime, endTime, meetTime, LocationType.STADIUM, team);
         this.opponent = opponent;
         this.home = home;
-        this.formation = formation;
     }
 }
