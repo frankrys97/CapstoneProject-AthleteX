@@ -1,5 +1,6 @@
 package francescocristiano.CapstoneProject.partecipation.controller;
 
+import francescocristiano.CapstoneProject.exceptions.BadRequestException;
 import francescocristiano.CapstoneProject.partecipation.NewPartecipationDTO;
 import francescocristiano.CapstoneProject.partecipation.Partecipation;
 import francescocristiano.CapstoneProject.partecipation.service.PartecipationService;
@@ -9,10 +10,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/partecipations")
@@ -29,7 +33,10 @@ public class PartecipationController {
     @PostMapping("/{teamId}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'COACH')")
     @ResponseStatus(HttpStatus.CREATED)
-    public Partecipation createPartecipation(@PathVariable UUID teamId, @RequestBody @Validated NewPartecipationDTO body, @AuthenticationPrincipal User currentUser) {
+    public Partecipation createPartecipation(@PathVariable UUID teamId, @RequestBody @Validated NewPartecipationDTO body, BindingResult validationResult, @AuthenticationPrincipal User currentUser) {
+        if (validationResult.hasErrors()) {
+            throw new BadRequestException(validationResult.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(", ")));
+        }
         return partecipationService.createPartecipation(teamId, currentUser, body);
     }
 

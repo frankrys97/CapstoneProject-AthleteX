@@ -6,6 +6,8 @@ import francescocristiano.CapstoneProject.event.payloads.NewEventDTO;
 import francescocristiano.CapstoneProject.exceptions.BadRequestException;
 import francescocristiano.CapstoneProject.player.payload.NewPlayerAddManuallyResponseDTO;
 import francescocristiano.CapstoneProject.player.payload.NewPlayerDTO;
+import francescocristiano.CapstoneProject.stadium.Stadium;
+import francescocristiano.CapstoneProject.stadium.payload.NewStadiumDTO;
 import francescocristiano.CapstoneProject.team.Team;
 import francescocristiano.CapstoneProject.team.payload.NewTeamDTO;
 import francescocristiano.CapstoneProject.team.payload.TeamComponentsDTO;
@@ -147,6 +149,33 @@ public class TeamController {
     @PreAuthorize("hasAnyAuthority('ADMIN', 'COACH')")
     public Event updateEventInTeam(@PathVariable UUID id, @PathVariable UUID idEvent, @RequestBody NewEventDTO event, @AuthenticationPrincipal User currentUser) {
         return teamService.updateEvent(id, idEvent, event, currentUser);
+    }
+
+    // Stadium for team
+
+    @GetMapping("/{teamId}/stadium")
+    public Stadium getStadiumForTeam(@PathVariable UUID teamId) {
+        return teamService.getStadiumForTeam(teamId);
+    }
+
+    @PostMapping("/{teamId}/stadium")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'COACH')")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Stadium createStadiumForTeam(@PathVariable UUID teamId, @RequestBody NewStadiumDTO stadium, @AuthenticationPrincipal User currentUser) {
+        return teamService.createStadiumForTeam(teamId, stadium, currentUser);
+    }
+
+    @PutMapping("/{teamId}/stadium/{stadiumId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'COACH')")
+    public Team addStadiumToTeam(@PathVariable UUID teamId, @PathVariable UUID stadiumId, @AuthenticationPrincipal User currentUser) {
+        return teamService.addStadiumToTeam(teamId, stadiumId, currentUser);
+    }
+
+    @DeleteMapping("/{teamId}/stadium")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'COACH')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeStadiumFromTeam(@PathVariable UUID teamId, @AuthenticationPrincipal User currentUser) {
+        teamService.removeStadiumFromTeam(teamId, currentUser);
     }
 
 

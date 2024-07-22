@@ -25,6 +25,7 @@ import francescocristiano.CapstoneProject.player.playerClass.PlayerStatus;
 import francescocristiano.CapstoneProject.player.service.PlayerService;
 import francescocristiano.CapstoneProject.stadium.Stadium;
 import francescocristiano.CapstoneProject.stadium.StadiumService;
+import francescocristiano.CapstoneProject.stadium.payload.NewStadiumDTO;
 import francescocristiano.CapstoneProject.team.Team;
 import francescocristiano.CapstoneProject.team.payload.NewTeamDTO;
 import francescocristiano.CapstoneProject.team.payload.TeamComponentsDTO;
@@ -79,6 +80,10 @@ public class TeamService {
 
     public Team findById(UUID id) {
         return teamRepository.findById(id).orElseThrow(() -> new NotFoundExpetion("Team not found"));
+    }
+
+    public Team save(Team team) {
+        return teamRepository.save(team);
     }
 
 
@@ -378,6 +383,56 @@ public class TeamService {
         }
         ;
         return foundEvent;
+    }
+
+    public Stadium getStadiumForTeam(UUID id) {
+        Team foundTeam = findById(id);
+        return foundTeam.getStadium();
+    }
+
+    public Stadium createStadiumForTeam(UUID id, NewStadiumDTO stadium, User currentUser) {
+        Team foundTeam = findById(id);
+        if (currentUser.getUserType().equals(UserType.COACH) && !foundTeam.getCoach().getId().equals(currentUser.getId())) {
+            throw new ForbiddenException("You are not allowed to add this stadium");
+        }
+
+        if (foundTeam.getStadium() != null) {
+            throw new BadRequestException("This team already has a stadium");
+        }
+
+        List<Stadium> stadiums = stadiumService.findAll();
+        for (Stadium s : stadiums) {
+            if (s.getName().equals(stadium.name()) && s.getCity().equals(stadium.city())) {
+                throw new BadRequestException("Stadium already exists, please choose a different name or city");
+            }
+        }
+        Stadium newStadium = new Stadium(stadium.name(), stadium.city(), stadium.address(), stadium.capacity(), foundTeam);
+        foundTeam.setStadium(newStadium);
+        return stadiumService.save(newStadium);
+    }
+
+    public Team addStadiumToTeam(UUID id, UUID stadiumId, User currentUser) {
+        Team foundTeam = findById(id);
+        Stadium foundStadium = stadiumService.findById(stadiumId);
+        if (currentUser.getUserType().equals(UserType.COACH) && !foundTeam.getCoach().getId().equals(currentUser.getId())) {
+            throw new ForbiddenException("You are not allowed to add this stadium");
+        }
+
+        if (foundTeam.getStadium() != null) {
+            throw new BadRequestException("This team already has a stadium");
+        }
+
+        foundTeam.setStadium(foundStadium);
+        return teamRepository.save(foundTeam);
+    }
+
+    public Team removeStadiumFromTeam(UUID id, User currentUser) {
+        Team foundTeam = findById(id);
+        if (currentUser.getUserType().equals(UserType.COACH) && !foundTeam.getCoach().getId().equals(currentUser.getId())) {
+            throw new ForbiddenException("You are not allowed to remove this stadium");
+        }
+        foundTeam.setStadium(null);
+        return teamRepository.save(foundTeam);
     }
 
 }
