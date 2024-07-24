@@ -51,4 +51,10 @@ public class AuthController {
         }
         return userService.createAdmin(newAdminDTO);
     }
+
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.OK)
+    public void logout(@RequestHeader("Authorization") String authorizationHeader) {
+        authService.logout(authorizationHeader);
+    }
 }

@@ -1,7 +1,9 @@
 package francescocristiano.CapstoneProject.security.auth;
 
+import francescocristiano.CapstoneProject.exceptions.BadRequestException;
 import francescocristiano.CapstoneProject.exceptions.UnauthorizedException;
 import francescocristiano.CapstoneProject.security.JWTTools;
+import francescocristiano.CapstoneProject.security.TokenInvalidateService;
 import francescocristiano.CapstoneProject.user.User;
 import francescocristiano.CapstoneProject.user.service.UserService;
 import francescocristiano.CapstoneProject.user.userPayloads.UserLoginDTO;
@@ -21,6 +23,9 @@ public class AuthService {
     @Autowired
     private PasswordEncoder bCryptPasswordEncoder;
 
+    @Autowired
+    private TokenInvalidateService tokenInvalidateService;
+
 
     public String authenticateAndGenerateToken(UserLoginDTO userLoginDTO) {
 
@@ -30,6 +35,14 @@ public class AuthService {
         } else {
             throw new UnauthorizedException("Invalid credentials");
         }
+    }
+
+    public void logout(String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw new BadRequestException("Invalid Authorization header");
+        }
+        String token = authorizationHeader.substring(7);
+        tokenInvalidateService.invalidateToken(token);
     }
 }
 

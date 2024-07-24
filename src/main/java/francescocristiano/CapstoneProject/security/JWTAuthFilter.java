@@ -34,6 +34,8 @@ public class JWTAuthFilter extends OncePerRequestFilter {
     private JWTTools jwtTools;
     @Autowired
     private UserService userService;
+    @Autowired
+    private TokenInvalidateService tokenInvalidateService;
 
     public JWTAuthFilter() {
         this.objectMapper = new ObjectMapper();
@@ -47,6 +49,8 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             String header = request.getHeader("Authorization");
             if (header == null || !header.startsWith("Bearer ")) throw new UnauthorizedException("Invalid token");
             String accessToken = header.substring(7);
+            if (tokenInvalidateService.isTokenInvalidated(accessToken))
+                throw new UnauthorizedException("Invalid token");
             jwtTools.verifyToken(accessToken);
             String id = jwtTools.extractIdFrom(accessToken);
             User currentUser = userService.findById(UUID.fromString(id));
@@ -78,6 +82,6 @@ public class JWTAuthFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         return new AntPathMatcher().match("/auth/**", request.getServletPath()) ||
                 new AntPathMatcher().match("/partecipations/**/reject", request.getServletPath()) ||
-                new AntPathMatcher().match("/partecipations/**/reject", request.getServletPath());
+                new AntPathMatcher().match("/partecipations/**/accept", request.getServletPath());
     }
 }
