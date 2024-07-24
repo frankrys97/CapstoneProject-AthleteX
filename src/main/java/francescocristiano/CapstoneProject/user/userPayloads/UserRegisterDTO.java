@@ -5,8 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-import java.util.UUID;
-
 public record UserRegisterDTO(
         @NotBlank(message = "Name cannot be blank")
         @Size(min = 3, max = 50, message = "Name must be between 3 and 50 characters")
@@ -25,7 +23,6 @@ public record UserRegisterDTO(
         @Pattern(regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$", message = "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character")
         String password,
         @NotBlank(message = "User type cannot be blank")
-        String userType,
-        UUID teamId
+        String userType
 ) {
 }

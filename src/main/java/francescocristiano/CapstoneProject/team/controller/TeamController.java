@@ -4,8 +4,10 @@ import francescocristiano.CapstoneProject.coach.Coach;
 import francescocristiano.CapstoneProject.event.Event;
 import francescocristiano.CapstoneProject.event.payloads.NewEventDTO;
 import francescocristiano.CapstoneProject.exceptions.BadRequestException;
+import francescocristiano.CapstoneProject.player.payload.NewJoinTeamDTO;
 import francescocristiano.CapstoneProject.player.payload.NewPlayerAddManuallyResponseDTO;
 import francescocristiano.CapstoneProject.player.payload.NewPlayerDTO;
+import francescocristiano.CapstoneProject.player.playerClass.Player;
 import francescocristiano.CapstoneProject.stadium.Stadium;
 import francescocristiano.CapstoneProject.stadium.payload.NewStadiumDTO;
 import francescocristiano.CapstoneProject.team.Team;
@@ -119,6 +121,21 @@ public class TeamController {
             throw new BadRequestException(validationResult.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(", ")));
         }
         return teamService.updatePlayer(id, idComponent, player, currentUser);
+    }
+
+    @PatchMapping("/me")
+    @PreAuthorize("hasAuthority('PLAYER')")
+    public Player joinInTeam(@RequestBody @Validated NewJoinTeamDTO teamId, BindingResult validationResult, @AuthenticationPrincipal Player currentUser) {
+        if (validationResult.hasErrors()) {
+            throw new BadRequestException(validationResult.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(", ")));
+        }
+        return teamService.joinInTeamFromUser(teamId, currentUser);
+    }
+    
+    @PatchMapping("/me/leave")
+    @PreAuthorize("hasAuthority('PLAYER')")
+    public void leaveTeam(@AuthenticationPrincipal Player currentUser) {
+        teamService.leaveTeamFromUser(currentUser);
     }
 
     // Events for team

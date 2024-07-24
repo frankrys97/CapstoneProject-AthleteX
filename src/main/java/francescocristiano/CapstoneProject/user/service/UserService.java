@@ -80,16 +80,14 @@ public class UserService {
                         userRegisterDTO.email()));
             }
             case "PLAYER" -> {
-                if (teamId == null) {
-                    throw new BadRequestException("Team id is required");
-                }
+
                 Player newPlayer = userRepository.save(new Player(userRegisterDTO.name(),
                         userRegisterDTO.surname(),
                         userRegisterDTO.username(),
                         bCryptPasswordEncoder.encode(userRegisterDTO.password()),
                         userRegisterDTO.email(),
-                        teamService.findById(userRegisterDTO.teamId())));
-
+                        teamId != null ? teamService.findById(teamId) : null));
+                
                 partecipationService.acceptPartecipationByEmail(newPlayer.getEmail());
                 return newPlayer;
             }

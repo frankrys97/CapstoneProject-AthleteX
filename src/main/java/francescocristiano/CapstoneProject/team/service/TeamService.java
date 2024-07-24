@@ -17,6 +17,7 @@ import francescocristiano.CapstoneProject.exceptions.ForbiddenException;
 import francescocristiano.CapstoneProject.exceptions.NotFoundExpetion;
 import francescocristiano.CapstoneProject.message.room.Room;
 import francescocristiano.CapstoneProject.message.room.RoomService;
+import francescocristiano.CapstoneProject.player.payload.NewJoinTeamDTO;
 import francescocristiano.CapstoneProject.player.payload.NewPlayerAddManuallyResponseDTO;
 import francescocristiano.CapstoneProject.player.payload.NewPlayerDTO;
 import francescocristiano.CapstoneProject.player.playerClass.Player;
@@ -433,6 +434,20 @@ public class TeamService {
         }
         foundTeam.setStadium(null);
         return teamRepository.save(foundTeam);
+    }
+
+    public Player joinInTeamFromUser(NewJoinTeamDTO joinTeam, Player player) {
+        if (player.getTeam() != null) {
+            throw new BadRequestException("Player already in a team");
+        }
+        Team foundTeam = findById(joinTeam.teamId());
+        player.setTeam(foundTeam);
+        return playerService.savePlayer(player);
+    }
+
+    public void leaveTeamFromUser(Player player) {
+        player.setTeam(null);
+        playerService.savePlayer(player);
     }
 
 }
