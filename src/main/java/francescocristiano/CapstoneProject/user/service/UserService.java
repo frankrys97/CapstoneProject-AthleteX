@@ -39,6 +39,15 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(() -> new NotFoundExpetion("User not found"));
     }
 
+    public boolean isUsernameTaken(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+
+    public boolean isEmailTaken(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
 
     public User findByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new NotFoundExpetion("User not found"));
@@ -87,7 +96,7 @@ public class UserService {
                         bCryptPasswordEncoder.encode(userRegisterDTO.password()),
                         userRegisterDTO.email(),
                         teamId != null ? teamService.findById(teamId) : null));
-                
+
                 partecipationService.acceptPartecipationByEmail(newPlayer.getEmail());
                 return newPlayer;
             }
