@@ -44,5 +44,15 @@ public class AuthService {
         String token = authorizationHeader.substring(7);
         tokenInvalidateService.invalidateToken(token);
     }
+
+    public User getAuthenticatedUser(String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw new BadRequestException("Invalid Authorization header");
+        }
+        String token = authorizationHeader.substring(7);
+        String id = jwtTools.extractIdFrom(token);
+        String userType = jwtTools.extractUserTypeFrom(token);
+        return userService.findUser(id, userType);
+    }
 }
 

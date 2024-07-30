@@ -18,6 +18,11 @@ public class CoachController {
     @Autowired
     private CoachService coachService;
 
+    @GetMapping("/me")
+    public Coach getCoach(@AuthenticationPrincipal Coach coach) {
+        return coachService.findById(coach.getId());
+    }
+
     @PutMapping("/me")
     public Coach updateCoach(@RequestBody NewUpdateCoachDTO body, @AuthenticationPrincipal Coach coach) {
         return coachService.updateCoach(body, coach);

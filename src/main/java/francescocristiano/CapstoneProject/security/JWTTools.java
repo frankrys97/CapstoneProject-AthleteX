@@ -21,6 +21,7 @@ public class JWTTools {
                 issuedAt(new Date(System.currentTimeMillis())).
                 expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 60)).
                 subject(String.valueOf(user.getId())).
+                claim("userType", user.getUserType().toString()).
                 signWith(Keys.hmacShaKeyFor(secret.getBytes())).
                 compact();
     }
@@ -36,4 +37,9 @@ public class JWTTools {
     public String extractIdFrom(String token) {
         return Jwts.parser().verifyWith(Keys.hmacShaKeyFor(secret.getBytes())).build().parseSignedClaims(token).getPayload().getSubject();
     }
+
+    public String extractUserTypeFrom(String token) {
+        return Jwts.parser().verifyWith(Keys.hmacShaKeyFor(secret.getBytes())).build().parseSignedClaims(token).getPayload().get("userType", String.class);
+    }
+
 }

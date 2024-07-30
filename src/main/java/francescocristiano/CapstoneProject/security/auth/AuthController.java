@@ -57,4 +57,9 @@ public class AuthController {
     public void logout(@RequestHeader("Authorization") String authorizationHeader) {
         authService.logout(authorizationHeader);
     }
+
+    @GetMapping("/me")
+    public User getUser(@RequestHeader("Authorization") String authorizationHeader) {
+        return authService.getAuthenticatedUser(authorizationHeader);
+    }
 }

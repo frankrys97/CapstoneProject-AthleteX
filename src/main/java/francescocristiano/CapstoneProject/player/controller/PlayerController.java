@@ -17,6 +17,11 @@ public class PlayerController {
     @Autowired
     private PlayerService playerService;
 
+    @GetMapping("/me")
+    public Player getPlayer(@AuthenticationPrincipal Player player) {
+        return playerService.findById(player.getId());
+    }
+
     @PutMapping("/me")
     public Player updatePlayer(@RequestBody NewUpdateByPlayerDTO player, @AuthenticationPrincipal Player user) {
         return playerService.updatePLayer(player, user);

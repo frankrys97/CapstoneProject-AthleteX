@@ -1,10 +1,12 @@
 package francescocristiano.CapstoneProject.user.service;
 
 import francescocristiano.CapstoneProject.coach.Coach;
+import francescocristiano.CapstoneProject.coach.service.CoachService;
 import francescocristiano.CapstoneProject.exceptions.BadRequestException;
 import francescocristiano.CapstoneProject.exceptions.NotFoundExpetion;
 import francescocristiano.CapstoneProject.partecipation.service.PartecipationService;
 import francescocristiano.CapstoneProject.player.playerClass.Player;
+import francescocristiano.CapstoneProject.player.service.PlayerService;
 import francescocristiano.CapstoneProject.team.service.TeamService;
 import francescocristiano.CapstoneProject.user.User;
 import francescocristiano.CapstoneProject.user.admin.Admin;
@@ -34,6 +36,24 @@ public class UserService {
     @Lazy
     private PartecipationService partecipationService;
 
+    @Autowired
+    @Lazy
+    private CoachService coachService;
+
+    @Autowired
+    @Lazy
+    private PlayerService playerService;
+
+
+    public User findUser(String id, String userType) {
+        if (userType.equals("PLAYER")) {
+            return playerService.findById(UUID.fromString(id));
+        } else if (userType.equals("COACH")) {
+            return coachService.findById(UUID.fromString(id));
+        } else {
+            throw new BadRequestException("Invalid user type");
+        }
+    }
 
     public User findById(UUID id) {
         return userRepository.findById(id).orElseThrow(() -> new NotFoundExpetion("User not found"));
