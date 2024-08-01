@@ -45,6 +45,11 @@ public class TeamController {
         return teamService.getAllTeamsByCoachId(currentUser.getId(), page, size, sortBy);
     }
 
+    @GetMapping("/{id}")
+    public Team getTeamById(@PathVariable UUID id) {
+        return teamService.findById(id);
+    }
+
     @PostMapping(consumes = "multipart/form-data")
     @PreAuthorize("hasAuthority('COACH')")
     @ResponseStatus(HttpStatus.CREATED)
@@ -131,7 +136,7 @@ public class TeamController {
         }
         return teamService.joinInTeamFromUser(teamId, currentUser);
     }
-    
+
     @PatchMapping("/me/leave")
     @PreAuthorize("hasAuthority('PLAYER')")
     public void leaveTeam(@AuthenticationPrincipal Player currentUser) {
