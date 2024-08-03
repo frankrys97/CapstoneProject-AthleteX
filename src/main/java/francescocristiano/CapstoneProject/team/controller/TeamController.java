@@ -87,7 +87,7 @@ public class TeamController {
     // COMPONENTS OF TEAMS
 
     @GetMapping("/{id}/components")
-    public TeamComponentsDTO getTeamComponents(@PathVariable UUID id, @AuthenticationPrincipal User currentUser) {
+    public TeamComponentsDTO getTeamComponent(@PathVariable UUID id, @AuthenticationPrincipal User currentUser) {
         return teamService.getTeamComponents(id, currentUser);
     }
 

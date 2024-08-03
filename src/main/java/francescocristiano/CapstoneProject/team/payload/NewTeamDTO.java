@@ -11,7 +11,9 @@ public record NewTeamDTO(
         String name,
         @PastOrPresent(message = "Creation date cannot be in the future")
         LocalDate creationDate,
+/*
         @Pattern(regexp = "^\\+?[0-9. ()-]{7,25}$", message = "Invalid phone number")
+*/
         String phone,
         @NotBlank(message = "Email cannot be blank")
         @Email(message = "Invalid email address")

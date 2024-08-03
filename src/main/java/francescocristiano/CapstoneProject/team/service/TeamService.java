@@ -132,7 +132,7 @@ public class TeamService {
         if (teams.stream().anyMatch(t -> t.getName().equals(teamDTO.name())) || teams.stream().anyMatch(t -> t.getEmail().equals(teamDTO.email()))) {
             throw new BadRequestException("Team already exists");
         }
-        Team newTeam = teamRepository.save(new Team(teamDTO.name(),
+   /*     Team newTeam = teamRepository.save(new Team(teamDTO.name(),
                 teamDTO.creationDate(),
                 teamDTO.phone(),
                 teamDTO.email(),
@@ -140,7 +140,22 @@ public class TeamService {
                 teamDTO.country(),
                 teamDTO.primaryColor(),
                 teamDTO.secondaryColor(),
-                coach));
+                coach));*/
+
+        Team newTeam = new Team();
+        newTeam.setName(teamDTO.name());
+        newTeam.setCreationDate(teamDTO.creationDate());
+        if (teamDTO.phone() != null && !teamDTO.phone().isEmpty()) {
+            newTeam.setPhone(teamDTO.phone());
+        }
+        newTeam.setEmail(teamDTO.email());
+        newTeam.setAddress(teamDTO.address());
+        newTeam.setCountry(teamDTO.country());
+        newTeam.setPrimaryColor(teamDTO.primaryColor());
+        newTeam.setSecondaryColor(teamDTO.secondaryColor());
+        newTeam.setCoach(coach);
+
+        teamRepository.save(newTeam);
         Room commonRoom = new Room(teamDTO.name().concat(" - Common Room"), newTeam);
         roomService.saveRoom(commonRoom);
         newTeam.setCommonRoom(commonRoom);

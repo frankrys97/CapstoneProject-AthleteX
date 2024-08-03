@@ -5,6 +5,7 @@ import com.cloudinary.utils.ObjectUtils;
 import francescocristiano.CapstoneProject.coach.Coach;
 import francescocristiano.CapstoneProject.coach.payloads.NewUpdateCoachDTO;
 import francescocristiano.CapstoneProject.coach.repository.CoachRepository;
+import francescocristiano.CapstoneProject.exceptions.BadRequestException;
 import francescocristiano.CapstoneProject.exceptions.NotFoundExpetion;
 import francescocristiano.CapstoneProject.player.service.PlayerService;
 import francescocristiano.CapstoneProject.team.Team;
@@ -56,7 +57,13 @@ public class CoachService {
         coach.setSurname(body.surname());
         coach.setEmail(body.email());
         coach.setUsername(body.username());
-        coach.setPassword(bcryptPasswordEncoder.encode(body.password()));
+        if (body.password() != null && !body.password().isEmpty()) {
+            if (body.oldPassword() != null && bcryptPasswordEncoder.matches(body.oldPassword(), coach.getPassword())) {
+                coach.setPassword(bcryptPasswordEncoder.encode(body.password()));
+            } else {
+                throw new BadRequestException("Wrong old password");
+            }
+        }
         return coachRepository.save(coach);
     }
 
