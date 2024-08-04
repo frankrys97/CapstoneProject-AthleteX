@@ -7,5 +7,5 @@ import francescocristiano.CapstoneProject.player.playerClass.Player;
 import java.util.List;
 
 public record TeamComponentsDTO(Coach coach,
-                                @JsonIgnoreProperties({"team", "statistics", "injuryPeriods", "avatar"}) List<Player> players) {
+                                @JsonIgnoreProperties({"team", "statistics", "injuryPeriods"}) List<Player> players) {
 }
