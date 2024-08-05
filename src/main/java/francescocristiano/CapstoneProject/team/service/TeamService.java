@@ -20,6 +20,7 @@ import francescocristiano.CapstoneProject.message.room.RoomService;
 import francescocristiano.CapstoneProject.player.payload.NewJoinTeamDTO;
 import francescocristiano.CapstoneProject.player.payload.NewPlayerAddManuallyResponseDTO;
 import francescocristiano.CapstoneProject.player.payload.NewPlayerDTO;
+import francescocristiano.CapstoneProject.player.payload.NewUpdatePlayerByCoachDTO;
 import francescocristiano.CapstoneProject.player.playerClass.Player;
 import francescocristiano.CapstoneProject.player.playerClass.PlayerPosition;
 import francescocristiano.CapstoneProject.player.playerClass.PlayerStatus;
@@ -300,7 +301,7 @@ public class TeamService {
         );
     }
 
-    public void removePlayerFromTeam(UUID id, UUID playerId, User currentUser) {
+    public Team removePlayerFromTeam(UUID id, UUID playerId, User currentUser) {
         Team foundTeam = findById(id);
         if (currentUser.getUserType().equals(UserType.COACH) && !currentUser.getId().equals(foundTeam.getCoach().getId())) {
             throw new ForbiddenException("You are not allowed to remove players from this team");
@@ -310,9 +311,10 @@ public class TeamService {
         foundTeam.getPlayers().remove(foundPlayer);
         teamRepository.save(foundTeam);
         playerService.savePlayer(foundPlayer);
+        return foundTeam;
     }
 
-    public NewPlayerAddManuallyResponseDTO updatePlayer(UUID id, UUID playerId, NewPlayerDTO player, User currentUser) {
+    public List<Player> updatePlayer(UUID id, UUID playerId, NewUpdatePlayerByCoachDTO player, User currentUser) {
         Team foundTeam = findById(id);
         if (currentUser.getUserType().equals(UserType.COACH) && !currentUser.getId().equals(foundTeam.getCoach().getId())) {
             throw new ForbiddenException("You are not allowed to update this player");
@@ -321,7 +323,10 @@ public class TeamService {
         foundPlayer.setName(player.name());
         foundPlayer.setSurname(player.surname());
         foundPlayer.setBirthDate(player.birthDate());
-        foundPlayer.setPosition(PlayerPosition.getPlayerPosition(player.position()));
+        if (player.position() != null) {
+            foundPlayer.setPosition(PlayerPosition.getPlayerPosition(player.position()));
+
+        }
         if (player.weight() != null) {
             foundPlayer.setWeight(player.weight());
         }
@@ -333,7 +338,7 @@ public class TeamService {
         }
         foundPlayer.setTeam(foundTeam);
         playerService.savePlayer(foundPlayer);
-        return new NewPlayerAddManuallyResponseDTO(foundPlayer.getId(),
+     /*   return new NewPlayerAddManuallyResponseDTO(foundPlayer.getId(),
                 foundPlayer.getName(),
                 foundPlayer.getSurname(),
                 foundPlayer.getBirthDate(),
@@ -344,7 +349,8 @@ public class TeamService {
                 player.height() != null ? foundPlayer.getHeight() : 0,
                 foundPlayer.getStatus(),
                 foundPlayer.getTeam().getName(),
-                foundPlayer.getTeam().getCoach().getName() + " " + foundPlayer.getTeam().getCoach().getSurname());
+                foundPlayer.getTeam().getCoach().getName() + " " + foundPlayer.getTeam().getCoach().getSurname());*/
+        return foundTeam.getPlayers().stream().toList();
     }
 
     // EVENTS

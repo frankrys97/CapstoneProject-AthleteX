@@ -7,6 +7,7 @@ import francescocristiano.CapstoneProject.exceptions.BadRequestException;
 import francescocristiano.CapstoneProject.player.payload.NewJoinTeamDTO;
 import francescocristiano.CapstoneProject.player.payload.NewPlayerAddManuallyResponseDTO;
 import francescocristiano.CapstoneProject.player.payload.NewPlayerDTO;
+import francescocristiano.CapstoneProject.player.payload.NewUpdatePlayerByCoachDTO;
 import francescocristiano.CapstoneProject.player.playerClass.Player;
 import francescocristiano.CapstoneProject.stadium.Stadium;
 import francescocristiano.CapstoneProject.stadium.payload.NewStadiumDTO;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -87,7 +89,7 @@ public class TeamController {
     // COMPONENTS OF TEAMS
 
     @GetMapping("/{id}/components")
-    public TeamComponentsDTO getTeamComponent(@PathVariable UUID id, @AuthenticationPrincipal User currentUser) {
+    public TeamComponentsDTO getTeamComponents(@PathVariable UUID id, @AuthenticationPrincipal User currentUser) {
         return teamService.getTeamComponents(id, currentUser);
     }
 
@@ -110,18 +112,18 @@ public class TeamController {
 
     @DeleteMapping("/{id}/components/{idComponent}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'COACH')")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removePlayerFromTeam(@PathVariable UUID id, @PathVariable UUID idComponent, @AuthenticationPrincipal User currentUser) {
-        teamService.removePlayerFromTeam(id, idComponent, currentUser);
+    @ResponseStatus(HttpStatus.OK)
+    public Team removePlayerFromTeam(@PathVariable UUID id, @PathVariable UUID idComponent, @AuthenticationPrincipal User currentUser) {
+        return teamService.removePlayerFromTeam(id, idComponent, currentUser);
     }
 
     @PutMapping("/{id}/components/{idComponent}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'COACH')")
-    public NewPlayerAddManuallyResponseDTO updatePlayerInTeam(@PathVariable UUID id,
-                                                              @PathVariable UUID idComponent,
-                                                              @RequestBody @Validated NewPlayerDTO player,
-                                                              BindingResult validationResult,
-                                                              @AuthenticationPrincipal User currentUser) {
+    public List<Player> updatePlayerInTeam(@PathVariable UUID id,
+                                           @PathVariable UUID idComponent,
+                                           @RequestBody @Validated NewUpdatePlayerByCoachDTO player,
+                                           BindingResult validationResult,
+                                           @AuthenticationPrincipal User currentUser) {
         if (validationResult.hasErrors()) {
             throw new BadRequestException(validationResult.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(", ")));
         }
