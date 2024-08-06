@@ -5,6 +5,7 @@ import francescocristiano.CapstoneProject.partecipation.NewPartecipationDTO;
 import francescocristiano.CapstoneProject.partecipation.Partecipation;
 import francescocristiano.CapstoneProject.partecipation.service.PartecipationService;
 import francescocristiano.CapstoneProject.user.User;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -41,13 +43,13 @@ public class PartecipationController {
     }
 
     @GetMapping("/{partecipationId}/accept")
-    public String acceptPartecipation(@PathVariable UUID partecipationId) {
-        return partecipationService.acceptPartecipation(partecipationId);
+    public void acceptPartecipation(@PathVariable UUID partecipationId, HttpServletResponse response) throws IOException {
+        partecipationService.acceptPartecipation(partecipationId, response);
     }
 
     @GetMapping("/{partecipationId}/reject")
-    public String rejectPartecipation(@PathVariable UUID partecipationId) {
-        return partecipationService.rejectPartecipation(partecipationId);
+    public void rejectPartecipation(@PathVariable UUID partecipationId, HttpServletResponse response) throws IOException {
+        partecipationService.rejectPartecipation(partecipationId, response);
     }
 
     @DeleteMapping("/{partecipationId}")

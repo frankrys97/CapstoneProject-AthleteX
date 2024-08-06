@@ -471,4 +471,13 @@ public class TeamService {
         playerService.savePlayer(player);
     }
 
+    public Player updatePlayerAvatar(UUID teamId, UUID componentId, MultipartFile avatar, User currentUser) throws IOException {
+        Team foundTeam = findById(teamId);
+        if (currentUser.getUserType().equals(UserType.COACH) && !foundTeam.getCoach().getId().equals(currentUser.getId())) {
+            throw new ForbiddenException("You are not allowed to update this player");
+        }
+        Player foundPlayer = playerService.findById(componentId);
+        return playerService.uploadAvatar(avatar, foundPlayer);
+    }
+
 }

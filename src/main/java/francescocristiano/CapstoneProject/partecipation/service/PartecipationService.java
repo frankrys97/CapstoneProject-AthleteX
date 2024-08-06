@@ -12,6 +12,7 @@ import francescocristiano.CapstoneProject.team.service.TeamService;
 import francescocristiano.CapstoneProject.user.User;
 import francescocristiano.CapstoneProject.user.enums.UserType;
 import francescocristiano.CapstoneProject.user.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @Service
@@ -60,19 +62,20 @@ public class PartecipationService {
         return partecipationRepository.findById(id).orElseThrow(() -> new NotFoundExpetion("Partecipation not found"));
     }
 
-    public String acceptPartecipation(UUID partecipationId) {
+    public void acceptPartecipation(UUID partecipationId, HttpServletResponse response) throws IOException {
         Partecipation foundPartecipation = findById(partecipationId);
         UUID teamId = foundPartecipation.getTeam().getId();
-        String registrationUrl = "http://localhost:5432/register?teamId=" + teamId;
-        return "redirect:" + registrationUrl;
+        String acceptUrl = "http://localhost:5173/register?teamId=" + teamId;
+        response.sendRedirect(acceptUrl);
     }
 
-    public String rejectPartecipation(UUID partecipationId) {
+    public void rejectPartecipation(UUID partecipationId, HttpServletResponse response) throws IOException {
         Partecipation foundPartecipation = findById(partecipationId);
         foundPartecipation.setStatusOfPartecipation(StatusOfPartecipation.REJECTED);
         partecipationRepository.save(foundPartecipation);
-        String thankYouUrl = "http://localhost:5432/thankyou";
-        return "redirect:" + thankYouUrl;
+        String thankYouUrl = "http://localhost:5173/thankyou";
+        response.sendRedirect(thankYouUrl);
+
     }
 
     public void acceptPartecipationByEmail(String email) {

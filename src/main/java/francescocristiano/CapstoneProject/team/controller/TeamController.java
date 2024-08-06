@@ -145,6 +145,12 @@ public class TeamController {
         teamService.leaveTeamFromUser(currentUser);
     }
 
+    @PatchMapping("/{id}/components/{idComponent}/avatar")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'COACH')")
+    public Player updateAvatar(@PathVariable UUID id, @PathVariable UUID idComponent, @RequestParam("avatar") MultipartFile file, @AuthenticationPrincipal User currentUser) throws IOException {
+        return teamService.updatePlayerAvatar(id, idComponent, file, currentUser);
+    }
+
     // Events for team
     @GetMapping("/{id}/events")
     public Page<Event> getEventsForTeam(@PathVariable UUID id,
