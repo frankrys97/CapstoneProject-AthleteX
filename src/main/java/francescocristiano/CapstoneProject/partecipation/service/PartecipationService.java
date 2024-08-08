@@ -14,6 +14,7 @@ import francescocristiano.CapstoneProject.user.enums.UserType;
 import francescocristiano.CapstoneProject.user.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -32,9 +34,11 @@ public class PartecipationService {
     private MailService mailService;
 
     @Autowired
+    @Lazy
     private UserService userService;
 
     @Autowired
+    @Lazy
     private TeamService teamService;
 
 
@@ -65,7 +69,7 @@ public class PartecipationService {
     public void acceptPartecipation(UUID partecipationId, HttpServletResponse response) throws IOException {
         Partecipation foundPartecipation = findById(partecipationId);
         UUID teamId = foundPartecipation.getTeam().getId();
-        String acceptUrl = "http://localhost:5173/register?teamId=" + teamId;
+        String acceptUrl = "http://localhost:5173/register?teamId=" + teamId + "&email=" + foundPartecipation.getEmail();
         response.sendRedirect(acceptUrl);
     }
 
@@ -102,4 +106,18 @@ public class PartecipationService {
         Team team = teamService.findById(teamId);
         return partecipationRepository.findAllByTeam(team, pageable);
     }
+
+    public void clearPartecipationFromTeam(UUID teamId) {
+        List<Partecipation> partecipations = partecipationRepository.findAll();
+
+        for (Partecipation partecipation : partecipations) {
+            if (partecipation.getTeam() != null && partecipation.getTeam().getId().equals(teamId)) {
+                partecipation.setTeam(null);
+
+                partecipationRepository.save(partecipation);
+                partecipationRepository.delete(partecipation);
+            }
+        }
+    }
+
 }

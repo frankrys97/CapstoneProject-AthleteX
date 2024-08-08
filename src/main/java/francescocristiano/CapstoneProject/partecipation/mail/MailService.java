@@ -28,7 +28,7 @@ public class MailService {
         String emailBody = "<div style=\"font-family: Arial, sans-serif; color: #333;\">"
                 + "<h2 style=\"color: #1a73e8;\">Ciao " + firstName + " " + lastName + "!</h2>"
                 + "<p>Sei stato invitato ad unirti al nostro team. Siamo entusiasti di averti con noi!</p>"
-                + "<table style=\"width: 100%; max-width: 600px; margin: 0 auto; background-color: #f9f9f9; padding: 20px; border-radius: 10px;\">"
+                + "<table style=\"width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px;\">"
                 + "  <tr>"
                 + "    <td style=\"text-align: center;\">"
                 + "      <img src=\"" + imageUrl + "\" alt=\"Team Banner\" style=\"width: 100%; max-width: 600px; height: auto; border-radius: 10px;\" />"

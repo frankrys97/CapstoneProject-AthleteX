@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import francescocristiano.CapstoneProject.coach.Coach;
 import francescocristiano.CapstoneProject.event.Event;
 import francescocristiano.CapstoneProject.message.room.Room;
+import francescocristiano.CapstoneProject.partecipation.Partecipation;
 import francescocristiano.CapstoneProject.player.playerClass.Player;
 import francescocristiano.CapstoneProject.stadium.Stadium;
 import jakarta.persistence.*;
@@ -49,6 +50,9 @@ public class Team {
     @OneToOne
     @JoinColumn(name = "common_room_id")
     private Room commonRoom;
+
+    @OneToMany(mappedBy = "team")
+    private List<Partecipation> partecipations;
 
 
     public Team(String name, LocalDate creationDate, String phone, String email, String address, String country, String primaryColor, String secondaryColor, Coach coach) {

@@ -17,6 +17,7 @@ import francescocristiano.CapstoneProject.exceptions.ForbiddenException;
 import francescocristiano.CapstoneProject.exceptions.NotFoundExpetion;
 import francescocristiano.CapstoneProject.message.room.Room;
 import francescocristiano.CapstoneProject.message.room.RoomService;
+import francescocristiano.CapstoneProject.partecipation.service.PartecipationService;
 import francescocristiano.CapstoneProject.player.payload.NewJoinTeamDTO;
 import francescocristiano.CapstoneProject.player.payload.NewPlayerAddManuallyResponseDTO;
 import francescocristiano.CapstoneProject.player.payload.NewPlayerDTO;
@@ -78,6 +79,9 @@ public class TeamService {
 
     @Autowired
     private StadiumService stadiumService;
+
+    @Autowired
+    private PartecipationService partecipationService;
 
 
     public Team findById(UUID id) {
@@ -213,6 +217,11 @@ public class TeamService {
             foundTeam.setStadium(null);
             stadium.setTeam(null);
             stadiumService.save(stadium);
+        }
+
+        if (foundTeam.getPartecipations() != null) {
+            partecipationService.clearPartecipationFromTeam(foundTeam.getId());
+            foundTeam.getPartecipations().clear();
         }
 
 
